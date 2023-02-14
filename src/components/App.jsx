@@ -2,7 +2,7 @@ import { Component } from 'react';
 
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
-import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
+
 import LargeImage from './LargeImage/LargeImage';
 
 import Button from './Button/Button';
@@ -22,6 +22,8 @@ class App extends Component {
     page: 1,
     showModal: false,
     largeImage: null,
+    showGalleryItem: false,
+    total: 0,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -33,10 +35,12 @@ class App extends Component {
   async fetchResults() {
     try {
       this.setState({ loading: true });
+
       const { search, page } = this.state;
-      const data = await imageFinder(search, page);
+      const { hits, totalHits } = await imageFinder(search, page);
       this.setState(({ results }) => ({
-        results: [...results, ...data.hits],
+        results: [...results, ...hits],
+        total: totalHits,
       }));
     } catch (error) {
       this.setState({ error: error.message });
@@ -46,7 +50,7 @@ class App extends Component {
   }
 
   searchResults = ({ search }) => {
-    this.setState({ search, results: [], page: 1 });
+    this.setState({ search, results: [], page: 1, showGalleryItem: true });
   };
 
   loadMore = () => {
@@ -71,18 +75,29 @@ class App extends Component {
   };
 
   render() {
-    const { results, loading, error, showModal, largeImage } = this.state;
+    const {
+      results,
+      loading,
+      error,
+      showModal,
+      largeImage,
+      showGalleryItem,
+      total,
+      page,
+    } = this.state;
     const { searchResults, loadMore, showImage, closeModal } = this;
+    const totalPage = Math.ceil(total / 12);
 
     return (
       <>
         <Searchbar onSubmit={searchResults} />
-        <ImageGallery>
-          <ImageGalleryItem results={results} showImage={showImage} />
-        </ImageGallery>
+        {showGalleryItem && (
+          <ImageGallery results={results} showImage={showImage} />
+        )}
+
         {error && <p className={styles.errorMessage}>{error}</p>}
         {loading && <Loader />}
-        {Boolean(results.length) && (
+        {Boolean(results.length) && page < totalPage && (
           <Button
             onClick={() => {
               loadMore();
@@ -92,6 +107,7 @@ class App extends Component {
             Load More
           </Button>
         )}
+
         {showModal && (
           <Modal close={closeModal}>
             <LargeImage {...largeImage} />

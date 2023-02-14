@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 
 import styles from './image-gallery-item.module.scss';
 
-const ImageGalleryItem = ({ results, showImage }) => {
-  const elements = results.map(({ id, webformatURL, largeImageURL }) => (
+const ImageGalleryItem = ({ id, webformatURL, largeImageURL, showImage }) => {
+  return (
     <li
       onClick={() => showImage({ largeImageURL })}
       key={id}
@@ -16,8 +16,7 @@ const ImageGalleryItem = ({ results, showImage }) => {
         width="260"
       />
     </li>
-  ));
-  return <>{elements}</>;
+  );
 };
 
 export default ImageGalleryItem;
@@ -27,12 +26,8 @@ ImageGalleryItem.defaultProps = {
 };
 
 ImageGalleryItem.propTypes = {
-  results: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      webformatURL: PropTypes.string.isRequired,
-      largeImageURL: PropTypes.string.isRequired,
-    })
-  ),
+  id: PropTypes.number,
+  webformatURL: PropTypes.string.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
   showImage: PropTypes.func.isRequired,
 };
